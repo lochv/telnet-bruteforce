@@ -10,6 +10,8 @@ usage:
 
     python TelnetScanner.py -f listip -t 300
 
+Scan default telnet with random ip or a list of ip
+
 optional arguments:
 
       -h, --help  show this help message and exit
