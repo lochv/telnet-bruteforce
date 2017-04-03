@@ -176,6 +176,17 @@ PRAGMA_HEARTBEAT = chr(140)  # TELOPT PRAGMA HEARTBEAT
 
 data = ""
 
+def banner():
+    banner = """
+ _____    _            _   ____                                  
+|_   _|__| |_ __   ___| |_/ ___|  ___ __ _ _ __  _ __   ___ _ __ 
+  | |/ _ \ | '_ \ / _ \ __\___ \ / __/ _` | '_ \| '_ \ / _ \ '__|
+  | |  __/ | | | |  __/ |_ ___) | (_| (_| | | | | | | |  __/ |   
+  |_|\___|_|_| |_|\___|\__|____/ \___\__,_|_| |_|_| |_|\___|_|   
+                                                                 
+
+        """
+    return banner
 
 def is_alive(ip):
     return os.system("ping -w 1 " + ip + ">> /dev/null") is 0
@@ -344,6 +355,8 @@ def scan_with_iprange(listip, maxThreadNum):
 
 
 if __name__ == "__main__":
+
+    print banner()
 
     parser = argparse.ArgumentParser(description = "",
                                                         usage = "\n\npython TelnetScanner.py -t 200\npython TelnetScanner.py -f listip.txt -t 200",)
