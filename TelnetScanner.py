@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     print banner()
 
-    parser = argparse.ArgumentParser(description = "Scan default telnet with random ip or a list of ip",
+    parser = argparse.ArgumentParser(description = "Scan default telnet with random ip or a list of ips",
                                                         usage = "\n\npython TelnetScanner.py -t 200\npython TelnetScanner.py -f listip.txt -t 200",)
     sgroup = parser.add_argument_group("TelnetScanner", "Options for TelnetScanner")
     sgroup.add_argument("-t", dest="thread", required=False, type=int, help="number of threads")
