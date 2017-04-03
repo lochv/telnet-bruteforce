@@ -13,7 +13,6 @@ TelnetScanner:
 
   Options for TelnetScanner
 
-
   -t THREAD   number of threads
   
   -f FILE     list ip
@@ -22,3 +21,6 @@ TelnetScanner:
  read result:
  
  ~: tail -f data.log
+
+ ~: cat data.log | grep I
+
