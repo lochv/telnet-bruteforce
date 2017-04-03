@@ -3,26 +3,26 @@
                                                                  
 usage: 
 
-python TelnetScanner.py -t 300
+    python TelnetScanner.py -t 300
 
-python TelnetScanner.py -f listip -t 300
+    python TelnetScanner.py -f listip -t 300
 
 optional arguments:
 
-  -h, --help  show this help message and exit
+      -h, --help  show this help message and exit
 
 TelnetScanner:
 
-  Options for TelnetScanner
+    Options for TelnetScanner
 
-  -t THREAD   number of threads
-  
-  -f FILE     list ip
+          -t THREAD   number of threads
+          
+          -f FILE     list ip
   
   
  read result:
  
- ~: tail -f data.log
+     ~: tail -f data.log
 
- ~: cat data.log | grep I
+     ~: cat data.log | grep INFO
 
