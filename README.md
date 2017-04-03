@@ -2,7 +2,7 @@
 
 Installation:
 
-~: pip install -r requirements 
+~: sudo pip install -r requirements 
                                                                  
 usage: 
 
