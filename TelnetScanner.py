@@ -93,7 +93,7 @@ dic = {
     "vodafone":
     [
         "vodafone",
-    ]
+    ],
 }
 
 # Telnet protocol get from telnetlib characters (don't change)
@@ -326,7 +326,7 @@ def scan_random_ip(maxThreadNum):
     while True:
         ip = socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))
         while threading.activeCount() > maxThreadNum:
-            time.sleep(1)
+            time.sleep(0.1)
         p = Thread(target=optimus, args=[ip])
         p.daemon = True
         p.start()
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     print banner()
 
-    parser = argparse.ArgumentParser(description = "",
+    parser = argparse.ArgumentParser(description = "Scan default telnet with random ip or a list of ip",
                                                         usage = "\n\npython TelnetScanner.py -t 200\npython TelnetScanner.py -f listip.txt -t 200",)
     sgroup = parser.add_argument_group("TelnetScanner", "Options for TelnetScanner")
     sgroup.add_argument("-t", dest="thread", required=False, type=int, help="number of threads")
