@@ -1,5 +1,8 @@
 # telnet-bruteforce
 
+Installation:
+
+~: pip install -r requirements 
                                                                  
 usage: 
 
