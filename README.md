@@ -10,7 +10,7 @@ usage:
 
     python TelnetScanner.py -f listip -t 300
 
-Scan default telnet with random ip or a list of ip
+Scan default telnet with random ip or a list of ips
 
 optional arguments:
 
