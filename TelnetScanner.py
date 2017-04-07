@@ -375,15 +375,15 @@ def scan_with_iprange(listip, maxThreadNum):
             net = IPNetwork(line.strip())
             for ip in net:
                 ip = str(ip)
-                optimus(ip)
-    #             while threading.activeCount() > maxThreadNum:
-    #                 time.sleep(1)
-    #             p = Thread(target=optimus, args=[ip])
-    #             p.daemon = True
-    #             threads.append(p)
-    #             p.start()
-    # for i in threads:
-    #     i.join()
+                # optimus(ip)
+                while threading.activeCount() > maxThreadNum:
+                    time.sleep(1)
+                p = Thread(target=optimus, args=[ip])
+                p.daemon = True
+                threads.append(p)
+                p.start()
+    for i in threads:
+        i.join()
 
 
 if __name__ == "__main__":
