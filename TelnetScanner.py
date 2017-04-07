@@ -366,7 +366,7 @@ def scan_random_ip(maxThreadNum):
         p.start()
 
 
-def scan_with_iprange(listip, maxThreadNum):
+def scan_with_iprange(listip, maxThreadNum, debug=False):
     threads = []
 
     with open(listip) as f:
@@ -375,7 +375,9 @@ def scan_with_iprange(listip, maxThreadNum):
             net = IPNetwork(line.strip())
             for ip in net:
                 ip = str(ip)
-                # optimus(ip)
+                if debug:
+                    optimus(ip)
+                    return
                 while threading.activeCount() > maxThreadNum:
                     time.sleep(1)
                 p = Thread(target=optimus, args=[ip])
@@ -395,6 +397,7 @@ if __name__ == "__main__":
     sgroup = parser.add_argument_group("TelnetScanner", "Options for TelnetScanner")
     sgroup.add_argument("-t", dest="thread", required=False, type=int, help="number of threads")
     sgroup.add_argument("-f", dest="file", required=False, type=str, help="list ip")
+    sgroup.add_argument("-d", dest="debug", required=False, type=str, help="debug")
     options = parser.parse_args()
 
     if not options.thread:
@@ -405,6 +408,9 @@ if __name__ == "__main__":
         options.thread = 3
 
     if options.file:
+        if options.debug:
+            scan_with_iprange(options.file, options.thread, debug=True)
+            sys.exit(1)
         scan_with_iprange(options.file, options.thread)
         sys.exit(1)
 
