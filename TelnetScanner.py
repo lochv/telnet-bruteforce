@@ -315,7 +315,7 @@ def optimus(ip):
     if not is_open_port_23(ip):
         sys.exit(1)
     logging.debug("O: " + ip)
-    print "try ", ip
+    # print "try ", ip
     i = 0
     for key in dic:
         values = dic[key]
