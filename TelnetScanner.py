@@ -232,23 +232,23 @@ def prompt_IAC(data):
 
 
 def prompt_reply_user(user, data):
-    if user == data:
+    if data and user and user == data:
         return True
     return False
 
 
 def prompt_login(data):
-    if "ogin:" in data:
+    if data and "ogin:" in data:
         return True
-    if "name:" in data:
+    if data and "name:" in data:
         return True
     return False
 
 
 def prompt_password(data):
-    if "word:" in data:
+    if data and "word:" in data:
         return True
-    if "word>" in data:
+    if data and "word>" in data:
         return True
     return False
 
@@ -284,29 +284,29 @@ def prompt_shell(data):
 
 
 def prompt_block(data):
-    if "refused" in data:
+    if data and "refused" in data:
         return True
-    if "lock" in data:
+    if data and "lock" in data:
         return True
-    if "rejected" in data:
+    if data and "rejected" in data:
         return True
-    if "eject the connection" in data:
+    if data and "eject the connection" in data:
         return True
     return False
 
 
 def prompt_limit(data):
-    if "limit" in data:
+    if data and "limit" in data:
         return True
     return False
 
 
 def prompt_login_failed(data):
-    if "ncorrect" in data:
+    if data and "ncorrect" in data:
         return True
-    if "ailed" in data:
+    if data and "ailed" in data:
         return True
-    if "nvalid" in data:
+    if data and "nvalid" in data:
         return True
     return False
 
