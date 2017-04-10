@@ -369,7 +369,6 @@ def optimus(ip):
                             just_prompted_IAC = False
                             continue
                         elif prompt_shell(data):
-                            print data
                             logging.info(key + ":" + values[i] + "@" + ip)
                             sys.exit(1)
                         elif prompt_block(data):
