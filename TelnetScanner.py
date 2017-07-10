@@ -69,6 +69,7 @@ dic = {
         "4321",
         "pass",
         "meinsm",
+        "vnpt",
     ],
     "support":
     [
@@ -176,6 +177,7 @@ PRAGMA_HEARTBEAT = chr(140)  # TELOPT PRAGMA HEARTBEAT
 
 data = ""
 
+
 def banner():
     banner = """
  _____    _            _   ____                                  
@@ -187,6 +189,7 @@ def banner():
 
         """
     return banner
+
 
 def is_alive(ip):
     return os.system("ping -w 1 " + ip + ">> /dev/null") is 0
@@ -206,7 +209,8 @@ def is_open_port_23(ip):
 
 def commandControl(sock, data):
     if data[1] and data[2] and [data[0], data[1], data[2]] == [IAC, DO, NAWS]:
-        res_msg = IAC + WILL + NAWS + IAC + SB + NAMS + theNULL + chr(80) + theNULL + TTYPE + IAC + SE
+        res_msg = IAC + WILL + NAWS + IAC + SB + NAMS + \
+            theNULL + chr(80) + theNULL + TTYPE + IAC + SE
         sock.send(res_msg)
         return
 
@@ -316,10 +320,11 @@ def optimus(ip):
         sys.exit(1)
     logging.debug("O: " + ip)
     # print "try ", ip
-    i = 0
     for key in dic:
+        i = 0
         values = dic[key]
         while i < len(values):
+            print i,key,values[i]
             tried = 0
             just_prompted_IAC = False
             prompted_login = False
@@ -332,6 +337,7 @@ def optimus(ip):
                 while True:
                     pre_data = data
                     data = s.recv(4096)
+                    # print data
                     if not data:
                         if not pre_data:
                             if tried > 1:
@@ -382,7 +388,13 @@ def optimus(ip):
                         else:
                             continue
                 i += 1
-            except Exception:
+            except Exception, e:
+                if "ime" in str(e):
+                    logging.error("BOT: " + ip)
+                    sys.exit()
+                if "refused" in str(e):
+                    logging.error("BLOCK: " + ip)
+                    sys.exit()
                 logging.error("CLOSE: " + ip)
                 sys.exit(1)
     logging.info("SEC: " + ip)
@@ -424,12 +436,16 @@ if __name__ == "__main__":
 
     print banner()
 
-    parser = argparse.ArgumentParser(description = "Scan default telnet with random ip or a list of ips",
-                                                        usage = "\n\npython TelnetScanner.py -t 200\npython TelnetScanner.py -f listip.txt -t 200",)
-    sgroup = parser.add_argument_group("TelnetScanner", "Options for TelnetScanner")
-    sgroup.add_argument("-t", dest="thread", required=False, type=int, help="number of threads")
-    sgroup.add_argument("-f", dest="file", required=False, type=str, help="list ip")
-    sgroup.add_argument("-d", dest="debug", required=False, type=str, help="debug")
+    parser = argparse.ArgumentParser(description="Scan default telnet with random ip or a list of ips",
+                                     usage="\n\npython TelnetScanner.py -t 200\npython TelnetScanner.py -f listip.txt -t 200",)
+    sgroup = parser.add_argument_group(
+        "TelnetScanner", "Options for TelnetScanner")
+    sgroup.add_argument("-t", dest="thread", required=False,
+                        type=int, help="number of threads")
+    sgroup.add_argument("-f", dest="file", required=False,
+                        type=str, help="list ip")
+    sgroup.add_argument("-d", dest="debug", required=False,
+                        type=str, help="debug")
     options = parser.parse_args()
 
     if not options.thread:
