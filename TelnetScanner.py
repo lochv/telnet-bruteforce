@@ -324,7 +324,6 @@ def optimus(ip):
         i = 0
         values = dic[key]
         while i < len(values):
-            print i,key,values[i]
             tried = 0
             just_prompted_IAC = False
             prompted_login = False
